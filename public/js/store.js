@@ -20,6 +20,28 @@ function readLS(key, fallback) {
 }
 function writeLS(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 
+/* ---------- WARNA -> FOTO PADA KARTU PRODUK ----------
+   Dots warna di kartu (hanya untuk produk dengan >1 warna).
+   Klik dot mengganti thumbnail kartu ke foto warna tersebut
+   tanpa pindah halaman. */
+function cardDotsHtml(p, active) {
+  if (!p.colors || p.colors.length < 2) return "";
+  const current = active || p.colors[0].name;
+  return `<div class="card__dots" style="position:relative;z-index:3;">${p.colors.map(c =>
+    `<button type="button" class="card__dot${c.name === current ? " active" : ""}" style="background:${c.hex}" data-card-color="${c.name}" title="${colorName(c.name)}" aria-label="${colorName(c.name)}" onclick="switchCardImage(event,'${p.id}','${c.name}')"></button>`
+  ).join("")}</div>`;
+}
+function switchCardImage(ev, id, color) {
+  ev.preventDefault();
+  const p = getProductById(id);
+  if (!p) return;
+  const card = ev.target.closest(".card");
+  const img = card && card.querySelector(".card__media img");
+  if (img) img.src = p.images[imageIndexForColor(p, color)];
+  if (card) card.querySelectorAll("[data-card-color]").forEach(b =>
+    b.classList.toggle("active", b.dataset.cardColor === color));
+}
+
 /* ---------- I18N HELPERS ---------- */
 function t(key, params) {
   const parts = key.split(".");
@@ -110,6 +132,7 @@ function removeFromCart(index) {
     const item = getCart()[index];
     if (!item) return;
     apiCart("/cart/" + item.cartItemId, "DELETE").then(res => {
+      if (!res.ok) { showToast(res.message || t('messages.cart_fail')); return; }
       window.SERVER_CART_ITEMS = res.cart; renderCounts();
       if (typeof onCartChange === "function") onCartChange();
     });
@@ -189,6 +212,14 @@ function applyVoucher(code) {
   const subtotal = cartTotal();
   const discount = promo.type === "percent" ? Math.round(subtotal * promo.value / 100) : promo.value;
   return { code: promo.code, discount: Math.min(discount, subtotal) };
+}
+/* Diskon dihitung ulang dari kode setiap dibutuhkan, supaya tidak basi
+   saat isi keranjang berubah setelah voucher dipasang. */
+function currentVoucherDiscount() {
+  let code = null;
+  try { code = JSON.parse(sessionStorage.getItem("frennz_voucher"))?.code || null; } catch (e) {}
+  if (!code) return { code: null, discount: 0 };
+  return applyVoucher(code) || { code, discount: 0 };
 }
 
 /* ---------- ORDERS ---------- */

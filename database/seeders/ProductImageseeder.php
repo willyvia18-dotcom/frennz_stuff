@@ -11,53 +11,53 @@ class ProductImageSeeder extends Seeder
     {
         $map = [
             'essential-oversized-hoodie' => [
-                'https://picsum.photos/seed/frennz-f01a/900/1150',
-                'https://picsum.photos/seed/frennz-f01b/900/1150',
-                'https://picsum.photos/seed/frennz-f01c/900/1150',
+                '/images/products/essential-oversized-hoodie-1.jpg',
+                '/images/products/essential-oversized-hoodie-2.jpg',
+                '/images/products/essential-oversized-hoodie-3.jpg',
             ],
             'signature-tee-heavyweight' => [
-                'https://picsum.photos/seed/frennz-f02a/900/1150',
-                'https://picsum.photos/seed/frennz-f02b/900/1150',
+                '/images/products/signature-tee-heavyweight-1.jpg',
+                '/images/products/signature-tee-heavyweight-2.jpg',
             ],
             'minimal-crewneck' => [
-                'https://picsum.photos/seed/frennz-f03a/900/1150',
-                'https://picsum.photos/seed/frennz-f03b/900/1150',
+                '/images/products/minimal-crewneck-1.jpg',
+                '/images/products/minimal-crewneck-2.jpg',
             ],
             'relaxed-fit-shirt' => [
-                'https://picsum.photos/seed/frennz-f04a/900/1150',
-                'https://picsum.photos/seed/frennz-f04b/900/1150',
+                '/images/products/relaxed-fit-shirt-1.jpg',
+                '/images/products/relaxed-fit-shirt-2.jpg',
             ],
             'tapered-cargo-pants' => [
-                'https://picsum.photos/seed/frennz-f05a/900/1150',
-                'https://picsum.photos/seed/frennz-f05b/900/1150',
+                '/images/products/tapered-cargo-pants-1.jpg',
+                '/images/products/tapered-cargo-pants-2.jpg',
             ],
             'wide-straight-denim' => [
-                'https://picsum.photos/seed/frennz-f06a/900/1150',
-                'https://picsum.photos/seed/frennz-f06b/900/1150',
+                '/images/products/wide-straight-denim-1.jpg',
+                '/images/products/wide-straight-denim-2.jpg',
             ],
             'structured-cap' => [
-                'https://picsum.photos/seed/frennz-f07a/900/1150',
-                'https://picsum.photos/seed/frennz-f07b/900/1150',
+                '/images/products/structured-cap-1.jpg',
+                '/images/products/structured-cap-2.jpg',
             ],
             'canvas-tote' => [
-                'https://picsum.photos/seed/frennz-f08a/900/1150',
-                'https://picsum.photos/seed/frennz-f08b/900/1150',
+                '/images/products/canvas-tote-1.jpg',
+                '/images/products/canvas-tote-2.jpg',
             ],
             'track-jacket-minimal' => [
-                'https://picsum.photos/seed/frennz-f09a/900/1150',
-                'https://picsum.photos/seed/frennz-f09b/900/1150',
+                '/images/products/track-jacket-minimal-1.jpg',
+                '/images/products/track-jacket-minimal-2.jpg',
             ],
             'ribbed-socks-set' => [
-                'https://picsum.photos/seed/frennz-f10a/900/1150',
-                'https://picsum.photos/seed/frennz-f10b/900/1150',
+                '/images/products/ribbed-socks-set-1.jpg',
+                '/images/products/ribbed-socks-set-2.jpg',
             ],
             'boxy-tee-washed' => [
-                'https://picsum.photos/seed/frennz-f11a/900/1150',
-                'https://picsum.photos/seed/frennz-f11b/900/1150',
+                '/images/products/boxy-tee-washed-1.jpg',
+                '/images/products/boxy-tee-washed-2.jpg',
             ],
             'quilted-vest' => [
-                'https://picsum.photos/seed/frennz-f12a/900/1150',
-                'https://picsum.photos/seed/frennz-f12b/900/1150',
+                '/images/products/quilted-vest-1.jpg',
+                '/images/products/quilted-vest-2.jpg',
             ],
         ];
 

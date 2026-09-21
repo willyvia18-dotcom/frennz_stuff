@@ -36,12 +36,12 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.attempt');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::post('/switch-account', [AuthController::class, 'switchAccount'])->name('switch.account');
-
-Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['GET', 'POST'], '/switch-account', [AuthController::class, 'switchAccount'])->name('switch.account');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');

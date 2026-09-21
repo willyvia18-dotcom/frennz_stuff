@@ -3,139 +3,140 @@
    Data produk contoh + kategori + testimoni (ID + EN). Produk yang
    diubah lewat panel admin disimpan sebagai override di localStorage
    supaya perubahan langsung terlihat di toko.
+   Brand: Nike & Adidas (6 + 6), warna disesuaikan palet brand.
    ============================================================ */
 
 const DEFAULT_PRODUCTS = [
   {
-    id: "f01", name: "Essential Oversized Hoodie", category: "Hoodie",
-    price: 429000, salePrice: 349000,
-    colors: [{name:"Hitam",hex:"#111110"},{name:"Krem",hex:"#e7ddc9"},{name:"Abu",hex:"#9a9691"}],
+    id: "f01", name: "Hoodie Ovania", brand: "Thankinsomnia", category: "Hoodie",
+    price: 449000, salePrice: 349000,
+    colors: [{name:"Hitam",hex:"#111111"},{name:"Abu",hex:"#9A9691"},{name:"Sail",hex:"#CBBFA4"}],
     sizes: ["S","M","L","XL"], stock: { S: 6, M: 10, L: 8, XL: 2 },
     rating: 4.8, reviews: 156,
-    desc: "Hoodie oversized dengan fleece 340gsm brushed-interior. Dipotong dengan siluet drop-shoulder yang bersih, minim aksen, dan dirancang untuk tahan lama.",
-    descEn: "Oversized hoodie with 340gsm brushed-interior fleece. Cut with a clean drop-shoulder silhouette, minimal accents, and designed to last.",
-    images: ["https://picsum.photos/seed/frennz-f01a/900/1150","https://picsum.photos/seed/frennz-f01b/900/1150","https://picsum.photos/seed/frennz-f01c/900/1150"],
+    desc: "Hoodie Ovania dari Thankinsomnia dengan fleece 340gsm dan potongan oversized. Nyaman untuk layering harian.",
+    descEn: "Hoodie Ovania by Thankinsomnia with 340gsm fleece and oversized cut. Comfortable for daily layering.",
+    images: ["/images/products/essential-oversized-hoodie-1.jpg","/images/products/essential-oversized-hoodie-2.jpg","/images/products/essential-oversized-hoodie-3.jpg"],
     tag: "SALE", bestseller: true
   },
   {
-    id: "f02", name: "Signature Tee — Heavyweight", category: "T-Shirt",
-    price: 219000, salePrice: null,
-    colors: [{name:"Putih",hex:"#ffffff"},{name:"Hitam",hex:"#111110"},{name:"Sand",hex:"#cbbfa4"}],
+    id: "f02", name: "Long Sleeve Polo Stone Island", brand: "Stone Island", category: "T-Shirt",
+    price: 299000, salePrice: null,
+    colors: [{name:"Putih",hex:"#FFFFFF"},{name:"Navy",hex:"#1E3A5F"}],
     sizes: ["S","M","L","XL"], stock: { S: 14, M: 18, L: 12, XL: 7 },
     rating: 4.9, reviews: 302,
-    desc: "T-shirt garment-dyed 240gsm dengan jahitan rapi dan kerah yang tidak melar. Menjadi dasar dari setiap tampilan.",
-    descEn: "240gsm garment-dyed tee with neat stitching and a collar that won't stretch out. The foundation of every outfit.",
-    images: ["https://picsum.photos/seed/frennz-f02a/900/1150","https://picsum.photos/seed/frennz-f02b/900/1150"],
+    desc: "Long Sleeve Polo Stone Island dengan compass patch ikonik di lengan dan bahan pique cotton garment-dyed yang lembut dan breathable. Kerah polo rib yang kokoh, potongan regular fit yang premium untuk tampilan smart casual.",
+    descEn: "Stone Island Long Sleeve Polo with iconic compass patch on the sleeve and soft breathable garment-dyed pique cotton. Sturdy ribbed polo collar, premium regular fit for smart casual look.",
+    images: ["/images/products/signature-tee-heavyweight-1.jpg","/images/products/signature-tee-heavyweight-2.jpg"],
     tag: "NEW", bestseller: true
   },
   {
-    id: "f03", name: "Minimal Crewneck", category: "Crewneck",
-    price: 379000, salePrice: null,
-    colors: [{name:"Krem",hex:"#e7ddc9"},{name:"Navy",hex:"#28303f"}],
+    id: "f03", name: "Crewneck Stone Island", brand: "Stone Island", category: "Crewneck",
+    price: 949000, salePrice: 849000,
+    colors: [{name:"Hitam",hex:"#111111"},{name:"Abu",hex:"#9A9691"}],
     sizes: ["M","L","XL"], stock: { M: 6, L: 6, XL: 4 },
-    rating: 4.6, reviews: 84,
-    desc: "Crewneck fleece dengan rib tebal di kerah dan pergelangan. Dibuat tanpa cetakan besar — hanya bordir logo kecil di dada.",
-    descEn: "Fleece crewneck with thick ribbing at the collar and cuffs. Made without big prints — just a small embroidered logo on the chest.",
-    images: ["https://picsum.photos/seed/frennz-f03a/900/1150","https://picsum.photos/seed/frennz-f03b/900/1150"],
-    tag: null, bestseller: false
-  },
-  {
-    id: "f04", name: "Relaxed Fit Shirt", category: "Kemeja",
-    price: 329000, salePrice: 279000,
-    colors: [{name:"Putih",hex:"#ffffff"},{name:"Sage",hex:"#a7b09a"}],
-    sizes: ["S","M","L","XL"], stock: { S: 4, M: 0, L: 5, XL: 3 },
-    rating: 4.5, reviews: 58,
-    desc: "Kemeja katun relaxed-fit dengan drape ringan dan kancing tanduk. Cocok dikenakan longgar atau dimasukkan.",
-    descEn: "Relaxed-fit cotton shirt with a light drape and horn buttons. Works worn loose or tucked in.",
-    images: ["https://picsum.photos/seed/frennz-f04a/900/1150","https://picsum.photos/seed/frennz-f04b/900/1150"],
-    tag: "SALE", bestseller: false
-  },
-  {
-    id: "f05", name: "Tapered Cargo Pants", category: "Celana",
-    price: 459000, salePrice: null,
-    colors: [{name:"Hitam",hex:"#111110"},{name:"Olive",hex:"#5c5c47"}],
-    sizes: ["29","30","32","34"], stock: { "29": 5, "30": 7, "32": 6, "34": 2 },
-    rating: 4.7, reviews: 121,
-    desc: "Celana cargo tapered dengan enam kantong fungsional dan bahan ripstop ringan tahan air.",
-    descEn: "Tapered cargo pants with six functional pockets in lightweight water-resistant ripstop fabric.",
-    images: ["https://picsum.photos/seed/frennz-f05a/900/1150","https://picsum.photos/seed/frennz-f05b/900/1150"],
-    tag: null, bestseller: true
-  },
-  {
-    id: "f06", name: "Wide Straight Denim", category: "Celana",
-    price: 499000, salePrice: 419000,
-    colors: [{name:"Biru Washed",hex:"#4a5b75"}],
-    sizes: ["29","30","32","34"], stock: { "29": 2, "30": 4, "32": 5, "34": 3 },
-    rating: 4.7, reviews: 69,
-    desc: "Denim wide-straight dengan wash medium-blue dan finishing halus tanpa distressing berlebihan.",
-    descEn: "Wide-straight denim in a medium-blue wash with a clean finish, free of excessive distressing.",
-    images: ["https://picsum.photos/seed/frennz-f06a/900/1150","https://picsum.photos/seed/frennz-f06b/900/1150"],
-    tag: "SALE", bestseller: false
-  },
-  {
-    id: "f07", name: "Structured Cap", category: "Aksesoris",
-    price: 179000, salePrice: null,
-    colors: [{name:"Hitam",hex:"#111110"},{name:"Krem",hex:"#e7ddc9"}],
-    sizes: ["ALL SIZE"], stock: { "ALL SIZE": 22 },
-    rating: 4.8, reviews: 97,
-    desc: "Topi structured six-panel dengan bordir logo minimal dan strap belakang yang dapat disesuaikan.",
-    descEn: "Structured six-panel cap with minimal logo embroidery and an adjustable rear strap.",
-    images: ["https://picsum.photos/seed/frennz-f07a/900/1150","https://picsum.photos/seed/frennz-f07b/900/1150"],
-    tag: "NEW", bestseller: false
-  },
-  {
-    id: "f08", name: "Canvas Tote", category: "Aksesoris",
-    price: 149000, salePrice: null,
-    colors: [{name:"Natural",hex:"#d8cfb8"}],
-    sizes: ["ALL SIZE"], stock: { "ALL SIZE": 30 },
-    rating: 4.6, reviews: 44,
-    desc: "Tote bag kanvas tebal 12oz dengan tali panjang dan cetakan wordmark kecil di depan.",
-    descEn: "Heavy 12oz canvas tote with long straps and a small wordmark print on the front.",
-    images: ["https://picsum.photos/seed/frennz-f08a/900/1150","https://picsum.photos/seed/frennz-f08b/900/1150"],
-    tag: null, bestseller: false
-  },
-  {
-    id: "f09", name: "Track Jacket Minimal", category: "Hoodie",
-    price: 449000, salePrice: null,
-    colors: [{name:"Hitam",hex:"#111110"},{name:"Krem",hex:"#e7ddc9"}],
-    sizes: ["S","M","L","XL"], stock: { S: 5, M: 7, L: 6, XL: 3 },
-    rating: 4.6, reviews: 39,
-    desc: "Jaket track dengan resleting penuh, panel tanpa jahitan mencolok, dan lapisan dalam tricot ringan.",
-    descEn: "Track jacket with a full zip, clean seam-free panels, and light tricot lining.",
-    images: ["https://picsum.photos/seed/frennz-f09a/900/1150","https://picsum.photos/seed/frennz-f09b/900/1150"],
-    tag: "NEW", bestseller: false
-  },
-  {
-    id: "f10", name: "Ribbed Socks Set", category: "Aksesoris",
-    price: 99000, salePrice: 79000,
-    colors: [{name:"Mix",hex:"#cbbfa4"}],
-    sizes: ["ALL SIZE"], stock: { "ALL SIZE": 48 },
-    rating: 4.8, reviews: 133,
-    desc: "Satu set tiga pasang kaos kaki rib tinggi dengan logo woven kecil di bagian atas.",
-    descEn: "A set of three pairs of high rib socks with a small woven logo at the top.",
-    images: ["https://picsum.photos/seed/frennz-f10a/900/1150","https://picsum.photos/seed/frennz-f10b/900/1150"],
+    rating: 4.9, reviews: 302,
+    desc: "Crewneck Stone Island garment-dyed dengan compass patch ikonik di lengan dan bahan loopback 460gsm. Hangat, breathable, dan potongan regular fit yang premium.",
+    descEn: "Stone Island garment-dyed crewneck with iconic compass patch on the sleeve and 460gsm loopback cotton. Warm, breathable, and premium regular fit.",
+    images: ["/images/products/minimal-crewneck-1.jpg","/images/products/minimal-crewneck-2.jpg"],
     tag: "SALE", bestseller: true
   },
   {
-    id: "f11", name: "Boxy Tee Washed", category: "T-Shirt",
-    price: 229000, salePrice: null,
-    colors: [{name:"Abu",hex:"#9a9691"},{name:"Hitam",hex:"#111110"}],
-    sizes: ["S","M","L","XL"], stock: { S: 6, M: 6, L: 6, XL: 6 },
-    rating: 4.4, reviews: 27,
-    desc: "T-shirt boxy-fit dengan proses garment wash agar tekstur terasa lebih lembut sejak pemakaian pertama.",
-    descEn: "Boxy-fit tee, garment-washed for a softer texture from the very first wear.",
-    images: ["https://picsum.photos/seed/frennz-f11a/900/1150","https://picsum.photos/seed/frennz-f11b/900/1150"],
+    id: "f04", name: "Kemeja Lyle and Scott", brand: "Lyle and Scott", category: "Kemeja",
+    price: 459000, salePrice: 379000,
+    colors: [{name:"Putih",hex:"#FFFFFF"},{name:"Sage",hex:"#9CAF88"}],
+    sizes: ["S","M","L","XL"], stock: { S: 4, M: 0, L: 5, XL: 3 },
+    rating: 4.5, reviews: 58,
+    desc: "Kemeja Lyle and Scott Oxford dengan bordir eagle ikonik di dada, bahan cotton poplin lembut dan breathable. Potongan regular fit yang rapi untuk tampilan smart casual.",
+    descEn: "Lyle and Scott Oxford shirt with iconic eagle embroidery at chest, soft breathable cotton poplin. Regular fit for smart casual look.",
+    images: ["/images/products/relaxed-fit-shirt-1.jpg","/images/products/relaxed-fit-shirt-2.jpg"],
+    tag: "SALE", bestseller: false
+  },
+  {
+    id: "f05", name: "Trackpants Adidas", brand: "Adidas", category: "Celana",
+    price: 599000, salePrice: null,
+    colors: [{name:"Hitam",hex:"#000000"},{name:"Navy",hex:"#1E3A5F"}],
+    sizes: ["29","30","32","34"], stock: { "29": 5, "30": 7, "32": 6, "34": 2 },
+    rating: 4.7, reviews: 121,
+    desc: "Trackpants Adidas dengan potongan tapered yang nyaman dan 3-stripes ikonik di sisi. Bahan double-knit lembut dengan manset elastis untuk tampilan sporty dan mobilitas harian.",
+    descEn: "Adidas trackpants with a comfortable tapered cut and iconic 3-stripes on the sides. Soft double-knit fabric with elastic cuffs for a sporty look and daily mobility.",
+    images: ["/images/products/tapered-cargo-pants-1.jpg","/images/products/tapered-cargo-pants-2.jpg"],
+    tag: null, bestseller: true
+  },
+  {
+    id: "f06", name: "Denim Pants Dralle", brand: "Thankinsomnia", category: "Celana",
+    price: 649000, salePrice: 549000,
+    colors: [{name:"Indigo",hex:"#2F3A56"},{name:"Hitam",hex:"#000000"}],
+    sizes: ["29","30","32","34"], stock: { "29": 2, "30": 4, "32": 5, "34": 3 },
+    rating: 4.7, reviews: 69,
+    desc: "Denim Pants Dralle dari Thankinsomnia dengan potongan wide straight dan wash indigo premium. Bahan denim 12oz yang kokoh namun nyaman untuk daily wear.",
+    descEn: "Thankinsomnia Denim Pants Dralle with wide straight cut and premium indigo wash. Sturdy 12oz denim yet comfortable for daily wear.",
+    images: ["/images/products/wide-straight-denim-1.jpg","/images/products/wide-straight-denim-2.jpg"],
+    tag: "SALE", bestseller: false
+  },
+  {
+    id: "f07", name: "Hat Rebellia", brand: "Thankinsomnia", category: "Aksesoris",
+    price: 249000, salePrice: null,
+    colors: [{name:"Hitam",hex:"#000000"},{name:"Krem",hex:"#F5F0E6"}],
+    sizes: ["ALL SIZE"], stock: { "ALL SIZE": 22 },
+    rating: 4.8, reviews: 97,
+    desc: "Hat Rebellia dari Thankinsomnia dengan desain 6-panel, bordir logo Thankinsomnia dan strap adjustable di belakang. Bahan twill premium yang ringan dan nyaman.",
+    descEn: "Thankinsomnia Hat Rebellia with 6-panel design, Thankinsomnia logo embroidery and adjustable rear strap. Premium lightweight twill.",
+    images: ["/images/products/structured-cap-1.jpg","/images/products/structured-cap-2.jpg"],
+    tag: "NEW", bestseller: false
+  },
+  {
+    id: "f08", name: "Tote Bag Floresca", brand: "Thankinsomnia", category: "Aksesoris",
+    price: 199000, salePrice: null,
+    colors: [{name:"Natural",hex:"#D8CFB8"}],
+    sizes: ["ALL SIZE"], stock: { "ALL SIZE": 30 },
+    rating: 4.6, reviews: 44,
+    desc: "Tote Bag Floresca dari Thankinsomnia berbahan kanvas 14oz dengan sablon grafis khas Thankinsomnia dan tali panjang yang kokoh. Kapasitas luas untuk daily essentials.",
+    descEn: "Thankinsomnia Tote Bag Floresca in 14oz canvas with signature Thankinsomnia graphic print and sturdy long straps. Spacious for daily essentials.",
+    images: ["/images/products/canvas-tote-1.jpg","/images/products/canvas-tote-2.jpg"],
     tag: null, bestseller: false
   },
   {
-    id: "f12", name: "Quilted Vest", category: "Hoodie",
-    price: 399000, salePrice: null,
-    colors: [{name:"Hitam",hex:"#111110"}],
+    id: "f09", name: "Tracktop Adidas", brand: "Adidas", category: "Hoodie",
+    price: 649000, salePrice: null,
+    colors: [{name:"Hitam",hex:"#000000"},{name:"Navy",hex:"#1E3A5F"}],
+    sizes: ["S","M","L","XL"], stock: { S: 5, M: 7, L: 6, XL: 3 },
+    rating: 4.6, reviews: 39,
+    desc: "Tracktop Adidas dengan 3-stripes ikonik di lengan.",
+    descEn: "Adidas tracktop with iconic 3-stripes on sleeves.",
+    images: ["/images/products/track-jacket-minimal-1.jpg","/images/products/track-jacket-minimal-2.jpg"],
+    tag: "NEW", bestseller: false
+  },
+  {
+    id: "f10", name: "Crew Sock Luma", brand: "Thankinsomnia", category: "Aksesoris",
+    price: 69000, salePrice: 49000,
+    colors: [{name:"Putih",hex:"#FFFFFF"},{name:"Hitam",hex:"#111111"}],
+    sizes: ["ALL SIZE"], stock: { "ALL SIZE": 48 },
+    rating: 4.8, reviews: 133,
+    desc: "Paket 3 kaos kaki Crew Sock Luma dari Thankinsomnia dengan bantalan nyaman untuk pemakaian harian. Tersedia dalam warna Putih dan Hitam.",
+    descEn: "Thankinsomnia Crew Sock Luma 3-pack with comfortable cushioning for daily wear. Available in White and Black.",
+    images: ["/images/products/ribbed-socks-set-1.jpg","/images/products/ribbed-socks-set-2.jpg"],
+    tag: "SALE", bestseller: true
+  },
+  {
+    id: "f11", name: "Tshirt Fosca Black Thankinsomnia", brand: "Thankinsomnia", category: "T-Shirt",
+    price: 299000, salePrice: null,
+    colors: [{name:"Hitam",hex:"#000000"}],
+    sizes: ["S","M","L","XL"], stock: { S: 6, M: 6, L: 6, XL: 6 },
+    rating: 4.4, reviews: 27,
+    desc: "Tshirt Fosca Black Thankinsomnia boxy-fit garment-washed. Warna Hitam.",
+    descEn: "Thankinsomnia Fosca Black boxy garment-washed tee. Black color.",
+    images: ["/images/products/boxy-tee-washed-1.jpg","/images/products/boxy-tee-washed-2.jpg"],
+    tag: null, bestseller: false
+  },
+  {
+    id: "f12", name: "C.P. Shell-R Google Jacket", brand: "C.P. Company", category: "Hoodie",
+    price: 549000, salePrice: null,
+    colors: [{name:"Hitam",hex:"#000000"}],
     sizes: ["S","M","L","XL"], stock: { S: 3, M: 4, L: 4, XL: 1 },
     rating: 4.5, reviews: 22,
-    desc: "Rompi quilted ringan dengan resleting penuh, cocok dilayer di atas hoodie atau kemeja.",
-    descEn: "Lightweight quilted vest with a full zip — perfect layered over a hoodie or shirt.",
-    images: ["https://picsum.photos/seed/frennz-f12a/900/1150","https://picsum.photos/seed/frennz-f12b/900/1150"],
+    desc: "Jaket C.P. Shell-R Google Jacket dari C.P. Company dengan lensa goggle ikonik di lengan. Cocok layering di atas hoodie.",
+    descEn: "C.P. Company C.P. Shell-R Google Jacket with iconic goggle lens on the sleeve. Perfect layering over hoodie.",
+    images: ["/images/products/quilted-vest-1.jpg","/images/products/quilted-vest-2.jpg"],
     tag: "NEW", bestseller: false
   }
 ];
@@ -164,6 +165,18 @@ function getProducts() {
 }
 function saveProducts(list) { localStorage.setItem("frennz_products", JSON.stringify(list)); }
 function getProductById(id) { return getProducts().find(p => String(p.id) === String(id)); }
+
+/* ============================================================
+   Warna -> foto: foto produk disimpan per warna dengan urutan
+   yang sama seperti daftar warna (colors[0] <-> images[0], dst).
+   Contoh produk 1: Hitam->foto 1, Abu->foto 2, Sail->foto 3.
+   ============================================================ */
+function imageIndexForColor(p, color) {
+  if (!p || !p.images || !p.images.length) return 0;
+  const idx = (p.colors || []).findIndex(c => c.name === color);
+  if (idx < 0) return 0;
+  return Math.min(idx, p.images.length - 1);
+}
 
 function getCategories() {
   if (window.SERVER_CATEGORIES && window.SERVER_CATEGORIES.length) return window.SERVER_CATEGORIES;

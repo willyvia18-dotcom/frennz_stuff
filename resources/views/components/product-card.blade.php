@@ -16,6 +16,7 @@
     </div>
   </div>
   <div class="card__body">
+    @if(!empty($product['brand']))<div class="text-muted" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">{{ $product['brand'] }}</div>@endif
     <h3 class="card__title">{{ $product['name'] }}</h3>
     <div class="card__price">
       @if(!empty($product['salePrice']))

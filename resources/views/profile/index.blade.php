@@ -29,6 +29,11 @@
   .pf-order__total{font-weight:700;}
   .pf-addr{border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;margin-top:12px;}
   .pf-badge{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--accent-tint);color:var(--accent);margin-left:6px;}
+  .pf-order__detail{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-soft);}
+  .pf-order.open .pf-order__detail{display:block;}
+  .pf-order__detail-row{display:flex;justify-content:space-between;gap:12px;padding:3px 0;}
+  .pf-order__item{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:13.5px;}
+  .pf-link-btn{border:none;background:none;color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;padding:0;}
 </style>
 @endsection
 
@@ -44,7 +49,7 @@
     <div class="nav-actions">
       @include('partials.lang-switch')
       <a class="nav-icon-btn" href="{{ route('wishlist.index') }}" aria-label="{{ __('ui.nav.wishlist') }}">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.6 2 5 5.4 5c2 0 3.4 1.1 4.1 2.3C10.2 6.1 11.6 5 13.6 5 17 5 18.5 8.6 17 11.9 14.5 16.4 12 21 12 21z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span class="nav-count" data-wishlist-count style="display:none">0</span>
       </a>
       <a class="nav-icon-btn" href="{{ route('cart.index') }}" aria-label="{{ __('ui.nav.cart') }}">
@@ -71,19 +76,19 @@
         </div>
       </div>
       <div class="pf-menu">
-        <button class="active" data-tab="orders">
+        <button type="button" class="active" data-tab="orders">
           <svg class="icon" viewBox="0 0 24 24"><path d="M6 2h12l1 5H5l1-5z"/><path d="M5 7h14v13H5z"/><path d="M9 11h6"/></svg>
           {{ __('ui.profile.tab_orders') }}
         </button>
-        <button data-tab="profile">
+        <button type="button" data-tab="profile">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.4-3.6 4.4-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg>
           {{ __('ui.profile.tab_profile') }}
         </button>
-        <button data-tab="addresses">
+        <button type="button" data-tab="addresses">
           <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
           {{ __('ui.profile.tab_addresses') }}
         </button>
-        <button data-tab="settings">
+        <button type="button" data-tab="settings">
           <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.3l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.5a7 7 0 0 0-2.2 1.3l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .9.1 1.3l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2.2 1.3L10 21h4l.4-2.5a7 7 0 0 0 2.2-1.3l2.3 1 2-3.4-2-1.5c.1-.4.1-.9.1-1.3z"/></svg>
           {{ __('ui.profile.tab_settings') }}
         </button>
@@ -146,7 +151,7 @@
               {{ __('ui.profile.switch_account') }} — <span class="text-muted" style="font-weight:400;margin-left:6px;">{{ __('ui.profile.switch_account_desc') }}</span>
             </button>
           </form>
-          <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('{{ __('ui.profile.logout_confirm') }}');">
+          <form id="logout-form" method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn btn-outline btn-block" style="justify-content:flex-start;color:var(--danger);border-color:var(--danger);">
               {{ __('ui.profile.logout') }}
@@ -171,35 +176,74 @@
 <script>
   const orders = @json($orders ?? []);
   const addresses = @json($addresses ?? []);
-  const totalSpend = {{ (float) $stats['spend'] }};
+  const totalSpend = {{ (float) ($stats['spend'] ?? 0) }};
+  const logoutConfirmText = @json(__('ui.profile.logout_confirm'));
   document.getElementById("stat-spend").textContent = formatRupiah(totalSpend);
   const statusClass = { pending:"processing", processing:"processing", shipped:"shipped", completed:"done", cancelled:"cancelled" };
   const statusLabel = { pending:t('admin.status_pending'), processing:t('admin.status_processing'), shipped:t('admin.status_shipped'), completed:t('admin.status_completed'), cancelled:t('admin.status_cancelled') };
 
-  document.querySelectorAll(".pf-menu button").forEach(btn => btn.onclick = () => {
-    document.querySelectorAll(".pf-menu button").forEach(b => b.classList.toggle("active", b === btn));
-    document.querySelectorAll(".pf-panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + btn.dataset.tab));
-  });
+  function activateTab(name) {
+    document.querySelectorAll(".pf-menu button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".pf-panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + name));
+  }
+  document.querySelectorAll(".pf-menu button").forEach(btn => btn.onclick = () => activateTab(btn.dataset.tab));
+  try {
+    const tabParam = new URLSearchParams(location.search).get("tab");
+    if (tabParam && document.getElementById("panel-" + tabParam)) activateTab(tabParam);
+  } catch (e) {}
 
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function formatOrderDate(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString(lsTag(), { day:"numeric", month:"long", year:"numeric" });
+  }
+
+  // --- Riwayat pesanan (dari database, bukan localStorage) ---
   const ordersEl = document.getElementById("orders-list");
-  if (!orders.length) {
+  if (!Array.isArray(orders) || !orders.length) {
     ordersEl.innerHTML = `<div class="empty-state"><h3>${t('profile.no_orders')}</h3><p>${t('profile.no_orders_text')}</p><a href="{{ route('products.index') }}" class="btn btn-primary" style="margin-top:14px">${t('cart.shop_now')}</a></div>`;
   } else {
-    ordersEl.innerHTML = orders.map(o => `
-      <div class="pf-order">
+    ordersEl.innerHTML = orders.map((o, idx) => {
+      const items = Array.isArray(o.items) ? o.items : [];
+      const itemCount = items.reduce((s, it) => s + (Number(it.qty) || 0), 0);
+      const itemsHtml = items.length
+        ? items.map(it => `<div class="pf-order__item"><span>${esc(it.name)}${it.size ? ` (${esc(it.size)})` : ""} ×${Number(it.qty) || 0}</span><span>${formatRupiah((Number(it.price) || 0) * (Number(it.qty) || 0))}</span></div>`).join("")
+        : "";
+      const addr = o.address || {};
+      const addrLine = [addr.line, addr.city, addr.postal].filter(Boolean).join(", ");
+      return `
+      <div class="pf-order" data-order="${idx}">
         <div class="pf-order__head">
           <div>
-            <div style="font-weight:700;">${t('profile.order_number', { id: o.id })}</div>
-            <div class="pf-order__meta">${new Date(o.date).toLocaleDateString(lsTag(),{day:"numeric",month:"long",year:"numeric"})} · ${o.courier}</div>
+            <div style="font-weight:700;">${t('profile.order_number', { id: esc(o.id) })}</div>
+            <div class="pf-order__meta">${formatOrderDate(o.date)} · ${esc(o.courier || "—")} · ${esc(o.payment || "—")}</div>
           </div>
-          <span class="status-pill ${statusClass[o.status]||"processing"}">${statusLabel[o.status]||o.status}</span>
+          <span class="status-pill ${statusClass[o.status] || "processing"}">${esc(statusLabel[o.status] || o.status || "—")}</span>
         </div>
-        <div class="pf-order__items">${o.items.map(it => `${it.name} (${it.size}) ×${it.qty}`).join("<br>")}</div>
+        <div class="pf-order__items">${items.map(it => `${esc(it.name)}${it.size ? ` (${esc(it.size)})` : ""} ×${Number(it.qty) || 0}`).join("<br>")}</div>
         <div class="pf-order__foot">
-          <span class="text-muted" style="font-size:12.5px;">${t('profile.order_items_n', { n: o.items.reduce((s,it)=>s+it.qty,0) })} · ${o.payment}</span>
-          <span class="pf-order__total">${formatRupiah(o.total)}</span>
+          <span class="text-muted" style="font-size:12.5px;">${t('profile.order_items_n', { n: itemCount })}</span>
+          <span style="display:flex;gap:12px;align-items:center;">
+            <button type="button" class="pf-link-btn" data-toggle-detail>${t('profile.view_detail')}</button>
+            <span class="pf-order__total">${formatRupiah(Number(o.total) || 0)}</span>
+          </span>
         </div>
-      </div>`).join("");
+        <div class="pf-order__detail">
+          ${itemsHtml}
+          <div class="pf-order__detail-row"><span>${t('checkout.shipping')}</span><span>${formatRupiah(Number(o.shipping) || 0)}</span></div>
+          ${Number(o.discount) > 0 ? `<div class="pf-order__detail-row"><span>Diskon${o.voucher ? ` (${esc(o.voucher)})` : ""}</span><span>-${formatRupiah(Number(o.discount))}</span></div>` : ""}
+          <div class="pf-order__detail-row" style="font-weight:700;color:var(--ink);"><span>Total</span><span>${formatRupiah(Number(o.total) || 0)}</span></div>
+          ${addrLine ? `<div class="pf-order__meta" style="margin-top:8px;">${esc(addrLine)}</div>` : ""}
+        </div>
+      </div>`;
+    }).join("");
+    ordersEl.querySelectorAll("[data-toggle-detail]").forEach(btn => {
+      btn.onclick = () => btn.closest(".pf-order").classList.toggle("open");
+    });
   }
 
   const addrEl = document.getElementById("addresses-list");
@@ -225,6 +269,20 @@
       btn.disabled = false;
       showToast(res.ok ? t('profile.updated') : (res.message || t('profile.update_fail')));
     });
+  });
+
+  // --- Logout: konfirmasi, bersihkan sisa sesi client, lalu POST ke /logout ---
+  // Server selalu redirect ke beranda (route home) dalam keadaan guest.
+  document.getElementById("logout-form").addEventListener("submit", e => {
+    if (!confirm(logoutConfirmText)) {
+      e.preventDefault();
+      return;
+    }
+    try {
+      sessionStorage.removeItem("frennz_voucher");
+      localStorage.removeItem("frennz_orders");
+    } catch (err) {}
+    // biarkan form terkirim normal (POST + CSRF) -> redirect ke beranda
   });
 </script>
 @endsection

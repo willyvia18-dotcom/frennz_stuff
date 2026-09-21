@@ -38,10 +38,11 @@
 
 @section('scripts')
 <script>
-  let cart = getCart();
-  const invalidItems = cart.filter(item => !/^\d+$/.test(String(item.productId)));
-  if (invalidItems.length) {
-    cart = cart.filter(item => /^\d+$/.test(String(item.productId)));
+  const rawCart = getCart();
+  // Buang item yang produknya sudah tidak ada (mis. dihapus admin),
+  // bukan berdasarkan format ID — ID fallback 'f01' tetap valid.
+  const cart = rawCart.filter(item => getProductById(item.productId));
+  if (cart.length !== rawCart.length) {
     if (window.IS_AUTHENTICATED) { window.SERVER_CART_ITEMS = cart; } else { saveCart(cart); }
     showToast(t('checkout.removed_old'));
   }
@@ -72,8 +73,7 @@
   if (!cart.length) {
     contentEl.innerHTML = `<div class="empty-state"><h3>${t('checkout.empty_title')}</h3><a href="{{ route('products.index') }}" class="btn btn-primary" style="margin-top:16px">${t('cart.shop_now')}</a></div>`;
   } else {
-    let voucher = null;
-    try { voucher = JSON.parse(sessionStorage.getItem("frennz_voucher")); } catch(e){}
+    const voucher = currentVoucherDiscount();
     const shipCostBase = cartTotal() >= 300000 ? 0 : 20000;
     const profile = window.BUYER_PROFILE || {};
 
@@ -124,16 +124,20 @@
           <h3>${t('cart.summary')}</h3>
           ${cart.map(item => {
             const p = getProductById(item.productId);
+            if (!p) return "";
             return `<div class="summary-row"><span>${p.name} (${item.size}) ×${item.qty}</span><span>${formatRupiah((p.salePrice||p.price)*item.qty)}</span></div>`;
           }).join("")}
           <div class="summary-row"><span>${t('checkout.shipping')}</span><span id="ship-label"></span></div>
-          ${voucher ? `<div class="summary-row"><span>${t('admin.voucher')} ${voucher.code}</span><span>-${formatRupiah(voucher.discount)}</span></div>` : ""}
+          ${voucher.code ? `<div class="summary-row"><span>${t('admin.voucher')} ${voucher.code}</span><span>-${formatRupiah(voucher.discount)}</span></div>` : ""}
           <div class="summary-row total"><span>${t('cart.total')}</span><span id="total-label"></span></div>
           <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px">${t('checkout.create')}</button>
         </div>
       </form>`;
 
     const form = document.getElementById("checkout-form");
+    // form.elements.namedItem: properti form.name menutupi input name="name",
+    // jadi akses input harus lewat elements.
+    const field = (n) => form.elements.namedItem(n);
 
     function addressCard(a) {
       return `<label class="radio-card" style="align-items:flex-start;">
@@ -186,20 +190,20 @@
       const a = addresses.find(x => x.id === selectedId) || null;
       const locked = !!a && editingId === null;
 
-      ["name", "phone", "address", "city", "postal"].forEach(n => { form[n].readOnly = locked; });
+      ["name", "phone", "address", "city", "postal"].forEach(n => { field(n).readOnly = locked; });
 
       if (a) {
-        form.name.value = a.name;
-        form.phone.value = a.phone;
-        form.address.value = a.address;
-        form.city.value = a.city;
-        form.postal.value = a.postal;
+        field("name").value = a.name;
+        field("phone").value = a.phone;
+        field("address").value = a.address;
+        field("city").value = a.city;
+        field("postal").value = a.postal;
       } else if (editingId === null && selectedId === null) {
-        form.name.value = form.name.value || (profile.name || "");
-        form.phone.value = form.phone.value || (profile.phone || "");
-        form.address.value = "";
-        form.city.value = "";
-        form.postal.value = "";
+        field("name").value = field("name").value || (profile.name || "");
+        field("phone").value = field("phone").value || (profile.phone || "");
+        field("address").value = "";
+        field("city").value = "";
+        field("postal").value = "";
       }
 
       const editable = !locked;
@@ -222,11 +226,11 @@
     function saveAddress() {
       const payload = {
         label: document.getElementById("addr-label").value || null,
-        recipient_name: form.name.value,
-        recipient_phone: form.phone.value,
-        address_line: form.address.value,
-        city: form.city.value,
-        postal: form.postal.value,
+        recipient_name: field("name").value,
+        recipient_phone: field("phone").value,
+        address_line: field("address").value,
+        city: field("city").value,
+        postal: field("postal").value,
         is_default: document.getElementById("addr-default").checked,
       };
       if (!payload.recipient_name || !payload.recipient_phone || !payload.address_line || !payload.city || !payload.postal) {
@@ -278,7 +282,7 @@
     function refreshTotals(courier) {
       const cost = courierCost[courier];
       document.getElementById("ship-label").textContent = cost === 0 ? t('common.free') : formatRupiah(cost);
-      const discount = voucher ? voucher.discount : 0;
+      const discount = voucher.discount;
       document.getElementById("total-label").textContent = formatRupiah(Math.max(0, cartTotal() + cost - discount));
     }
     refreshTotals("Reguler");
@@ -290,7 +294,7 @@
       e.preventDefault();
       if (selectedId === null && editingId !== null) { showToast(t('checkout.address_save_fail')); return; }
       const fd = new FormData(e.target);
-      const discount = voucher ? voucher.discount : 0;
+      const discount = voucher.discount;
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = t('checkout.processing');
@@ -305,7 +309,7 @@
         courier: fd.get("courier"),
         payment: fd.get("payment"),
         address_id: selectedId,
-        voucher_code: voucher ? voucher.code : null,
+        voucher_code: voucher.code,
         discount: discount,
         items: cart.map(item => ({
           product_id: parseInt(item.productId, 10),

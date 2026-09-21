@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $revenue = (float) Order::sum('total');
+        $revenue = (float) Order::where('status', '!=', 'cancelled')->sum('total');
         $orderCount = Order::count();
         $productCount = Product::count();
         $customerCount = Order::distinct('buyer_email')->count('buyer_email');

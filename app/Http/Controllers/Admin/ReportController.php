@@ -17,6 +17,7 @@ class ReportController extends Controller
         $cancelled = Order::where('status', 'cancelled')->count();
 
         $monthly = Order::where('status', '!=', 'cancelled')
+            ->whereYear('created_at', now()->year)
             ->get()
             ->groupBy(fn ($o) => $o->created_at->month)
             ->map(fn ($g) => (float) $g->sum('total'));

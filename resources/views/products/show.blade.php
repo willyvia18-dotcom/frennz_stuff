@@ -21,7 +21,7 @@
       </div>
       @include('partials.lang-switch')
       <a class="nav-icon-btn" href="{{ route('wishlist.index') }}" aria-label="{{ __('ui.nav.wishlist') }}">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.6 2 5 5.4 5c2 0 3.4 1.1 4.1 2.3C10.2 6.1 11.6 5 13.6 5 17 5 18.5 8.6 17 11.9 14.5 16.4 12 21 12 21z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span class="nav-count" data-wishlist-count style="display:none">0</span>
       </a>
       <a class="nav-icon-btn" href="{{ route('cart.index') }}" aria-label="{{ __('ui.nav.cart') }}">
@@ -92,11 +92,12 @@
           <div class="pdp__thumbs">
             ${product.images.map((img,i) => `<button class="${i===state.image?"active":""}" data-thumb="${i}"><img src="${img}" alt=""></button>`).join("")}
           </div>
-          <div class="pdp__main" id="zoom-box"><img src="${product.images[state.image]}" alt="${product.name}"></div>
+          <div class="pdp__main"><img src="${product.images[state.image]}" alt="${product.name}"></div>
         </div>
         <div>
-          <h1 class="pdp__title">${product.name}</h1>
-          <div class="pdp__stars">
+           ${product.brand ? `<div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);margin-bottom:6px;">${product.brand}</div>` : ""}
+           <h1 class="pdp__title">${product.name}</h1>
+           <div class="pdp__stars">
             ${"★".repeat(Math.round(product.rating))}${"☆".repeat(5-Math.round(product.rating))}
             <span class="text-muted">${product.rating} ${t('product.reviews', { n: product.reviews })}</span>
           </div>
@@ -137,9 +138,9 @@
         </div>`;
 
       pdpEl.querySelectorAll("[data-thumb]").forEach(b => b.onclick = () => { state.image = +b.dataset.thumb; render(); });
-      pdpEl.querySelectorAll("[data-color]").forEach(b => b.onclick = () => { state.color = b.dataset.color; render(); });
+      pdpEl.querySelectorAll("[data-color]").forEach(b => b.onclick = () => { state.color = b.dataset.color; state.image = imageIndexForColor(product, state.color); render(); });
       pdpEl.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { state.size = b.dataset.size; state.qty = 1; render(); });
-      pdpEl.querySelector('[data-qty="inc"]').onclick = () => { state.qty = Math.min(state.qty+1, stock||99); render(); };
+      pdpEl.querySelector('[data-qty="inc"]').onclick = () => { state.qty = Math.min(state.qty+1, stock > 0 ? stock : 1); render(); };
       pdpEl.querySelector('[data-qty="dec"]').onclick = () => { state.qty = Math.max(1, state.qty-1); render(); };
       const addBtn = pdpEl.querySelector("#add-cart-btn");
       const buyBtn = pdpEl.querySelector("#buy-now-btn");
@@ -156,10 +157,79 @@ if (wishBtn) wishBtn.onclick = () => toggleWishlist(product.id).then(state => {
   wishBtn.textContent = state ? t('common.wishlist_remove') : t('common.wishlist_add');
 });
 
-const zoomBox = document.getElementById("zoom-box");      zoomBox.addEventListener("mouseenter", () => zoomBox.classList.add("zoomed"));
-      zoomBox.addEventListener("mouseleave", () => zoomBox.classList.remove("zoomed"));
+
     }
     render();
+
+    function sizeGuideFor(p) {
+      const cat = String(p.category || "").toLowerCase();
+      const name = String(p.name || "").toLowerCase();
+      const sizes = (p.sizes || []).map(s => String(s));
+      const isPants = cat.includes("celana") || cat.includes("pant")
+        || sizes.some(s => /^(2[6-9]|3[0-8])$/.test(s));
+      const isAllSize = sizes.length === 1 && /all/i.test(sizes[0] || "");
+
+      // Celana: ukuran pinggang numerik, bukan S/M/L/XL atasan
+      if (isPants) {
+        return {
+          headers: [t('product.sg_size'), t('product.sg_waist'), t('product.sg_pants_length'), t('product.sg_thigh')],
+          rows: [["29","76","102","58"],["30","79","103","60"],["32","84","104","62"],["34","89","105","64"]],
+          note: null,
+        };
+      }
+
+      // Topi
+      if (name.includes("cap") || name.includes("topi") || name.includes("hat")) {
+        return {
+          headers: [t('product.sg_size'), t('product.sg_head')],
+          rows: [["ALL SIZE","56–60"]],
+          note: t('product.sg_note_cap'),
+        };
+      }
+
+      // Kaos kaki
+      if (name.includes("sock") || name.includes("kaos") || name.includes("kaki")) {
+        return {
+          headers: [t('product.sg_size'), t('product.sg_eu'), t('product.sg_foot')],
+          rows: [["ALL SIZE","39–44","25–28"]],
+          note: t('product.sg_note_socks'),
+        };
+      }
+
+      // Tote bag / tas
+      if (name.includes("tote") || name.includes("tas") || name.includes("bag")) {
+        return {
+          headers: [t('product.sg_size'), t('product.sg_dimensions')],
+          rows: [["ALL SIZE","38 × 40 × 10"]],
+          note: t('product.sg_note_tote'),
+        };
+      }
+
+      // Aksesoris all-size lain: jangan tampilkan tabel baju
+      if (isAllSize) {
+        return { headers: [], rows: [], note: t('product.sg_note_onesize') };
+      }
+
+      // Default: atasan (hoodie, kaos, kemeja, crewneck, jaket, vest)
+      return {
+        headers: [t('product.sg_size'), t('product.sg_chest'), t('product.sg_length')],
+        rows: [["S","50","68"],["M","53","70"],["L","56","72"],["XL","59","74"]],
+        note: null,
+      };
+    }
+
+    function sizeGuideHtml(p) {
+      const guide = sizeGuideFor(p);
+      let html = `<h3>${t('product.size_guide_title')}</h3>`;
+      if (guide.headers.length && guide.rows.length) {
+        html += `<table class="size-guide-table"><thead><tr>${guide.headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>`
+          + `<tbody>${guide.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+      }
+      if (guide.note) {
+        html += `<p class="text-muted" style="font-size:13.5px;margin-top:10px;">${guide.note}</p>`;
+      }
+      return html;
+    }
 
     document.getElementById("pdp-below").innerHTML = `
       <div class="pdp-block">
@@ -167,16 +237,7 @@ const zoomBox = document.getElementById("zoom-box");      zoomBox.addEventListen
         <p>${descOf(product)}</p>
       </div>
       <div class="pdp-block">
-        <h3>${t('product.size_guide_title')}</h3>
-        <table class="size-guide-table">
-          <thead><tr><th>${t('product.sg_size')}</th><th>${t('product.sg_chest')}</th><th>${t('product.sg_length')}</th></tr></thead>
-          <tbody>
-            <tr><td>S</td><td>50</td><td>68</td></tr>
-            <tr><td>M</td><td>53</td><td>70</td></tr>
-            <tr><td>L</td><td>56</td><td>72</td></tr>
-            <tr><td>XL</td><td>59</td><td>74</td></tr>
-          </tbody>
-        </table>
+        ${sizeGuideHtml(product)}
       </div>
       <div class="pdp-block">
         <h3>${t('product.customer_reviews', { n: product.reviews })}</h3>
@@ -190,11 +251,12 @@ const zoomBox = document.getElementById("zoom-box");      zoomBox.addEventListen
     const related = getProducts().filter(p => p.category === product.category && p.id !== product.id).slice(0,4);
     function productCard(p) {
       const price = p.salePrice ? `<span class="now">${formatRupiah(p.salePrice)}</span> <del>${formatRupiah(p.price)}</del>` : formatRupiah(p.price);
+      const brand = p.brand ? `<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);margin-bottom:4px;">${p.brand}</div>` : "";
       return `<article class="card">
         ${p.tag === "NEW" ? `<span class="card__flag">${t('common.new_flag')}</span>` : ""}
         <a class="card__link" href="{{ route('products.show') }}?id=${p.id}"></a>
         <div class="card__media"><img src="${p.images[0]}" alt="${p.name}" loading="lazy"></div>
-        <div class="card__body"><h3 class="card__title">${p.name}</h3><div class="card__price">${price}</div></div>
+        <div class="card__body">${brand}<h3 class="card__title">${p.name}</h3><div class="card__price">${price}</div>${cardDotsHtml(p)}</div>
       </article>`;
     }
     document.getElementById("related-grid").innerHTML = related.map(productCard).join("") || `<p class="text-muted">${t('product.no_related')}</p>`;

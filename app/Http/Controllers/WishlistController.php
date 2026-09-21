@@ -10,7 +10,7 @@ class WishlistController extends Controller
 {
     public function toggle(Request $request)
     {
-        $data = $request->validate(['product_id' => ['required', 'integer']]);
+        $data = $request->validate(['product_id' => ['required', 'integer', 'exists:products,id']]);
 
         $existing = Wishlist::where('user_id', Auth::id())
             ->where('product_id', $data['product_id'])

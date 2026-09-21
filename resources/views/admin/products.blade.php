@@ -33,6 +33,7 @@
       <input type="hidden" name="id">
       <div class="form-grid">
         <div class="field full"><label>{{ __('ui.admin.f_name') }}</label><input required name="name"></div>
+        <div class="field"><label>Brand</label><select name="brand" required><option value="Nike">Nike</option><option value="Adidas">Adidas</option></select></div>
         <div class="field"><label>{{ __('ui.admin.th_category') }}</label><select name="category" required></select></div>
         <div class="field"><label>{{ __('ui.admin.f_rating') }}</label><input type="number" name="rating" min="1" max="5" step="0.1" value="4.5"></div>
         <div class="field"><label>{{ __('ui.admin.f_price') }}</label><input required type="number" name="price" min="0"></div>
@@ -63,12 +64,12 @@
   refreshCatOptions();
 
   function renderRows() {
-    const products = getProducts().filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    const products = getProducts().filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || (p.brand && p.brand.toLowerCase().includes(search.toLowerCase())));
     document.getElementById("count").textContent = getProducts().length;
     document.getElementById("product-rows").innerHTML = products.map(p => {
       const totalStock = Object.values(p.stock).reduce((a,b)=>a+b,0);
       return `<tr>
-        <td><div class="line-item"><img src="${p.images[0]}" alt=""><span style="font-weight:600">${p.name}</span></div></td>
+        <td><div class="line-item"><img src="${p.images[0]}" alt=""><span style="font-weight:600">${p.brand ? `<span style="font-size:10px;color:var(--stone);display:block;letter-spacing:.06em;text-transform:uppercase">${p.brand}</span>` : ""}${p.name}</span></div></td>
         <td>${catLabelByName(p.category)}</td>
         <td>${formatRupiah(p.price)}</td>
         <td>${p.salePrice ? formatRupiah(p.salePrice) : t('admin.dash')}</td>
@@ -96,7 +97,7 @@
     form.reset();
     form.id.value = product ? product.id : "";
     if (product) {
-      form.name.value = product.name; form.category.value = product.category; form.rating.value = product.rating;
+      form.name.value = product.name; form.brand.value = product.brand || "Nike"; form.category.value = product.category; form.rating.value = product.rating;
       form.price.value = product.price; form.salePrice.value = product.salePrice || "";
       form.sizes.value = product.sizes.join(",");
       form.stockList.value = product.sizes.map(s => product.stock[s] ?? 0).join(",");
@@ -117,6 +118,7 @@ form.addEventListener("submit", e => {
   const id = fd.get("id");
   const payload = {
     name: fd.get("name"),
+    brand: fd.get("brand"),
     category: fd.get("category"),
     rating: fd.get("rating"),
     price: fd.get("price"),

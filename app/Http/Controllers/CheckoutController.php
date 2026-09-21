@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,10 +28,9 @@ class CheckoutController extends Controller
             'courier' => ['required', 'in:Reguler,Express'],
             'payment' => ['required', 'in:Transfer Bank,E-Wallet,COD'],
             'voucher_code' => ['nullable', 'string'],
-            'discount' => ['nullable', 'numeric', 'min:0'],
             'address_id' => ['nullable', 'integer'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.product_id' => ['required', 'integer'],
+            'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.size' => ['nullable', 'string'],
             'items.*.color' => ['nullable', 'string'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
@@ -40,6 +40,7 @@ class CheckoutController extends Controller
             $order = DB::transaction(function () use ($data) {
                 $subtotal = 0;
                 $lineItems = [];
+                $purchasedVariantIds = [];
 
                 foreach ($data['items'] as $line) {
                     $product = Product::with('variants')->find($line['product_id']);
@@ -57,6 +58,7 @@ class CheckoutController extends Controller
                     }
 
                     $variant->decrement('stock', $line['qty']);
+                    $purchasedVariantIds[] = $variant->id;
 
                     $price = (float) ($product->sale_price ?? $product->price);
                     $subtotal += $price * $line['qty'];
@@ -76,7 +78,15 @@ class CheckoutController extends Controller
                     ? 45000
                     : ($subtotal >= 300000 ? 0 : 20000);
 
-                $discount = min((float) ($data['discount'] ?? 0), $subtotal);
+                // Diskon selalu dihitung ulang di server dari kode voucher —
+                // nilai 'discount' dari client tidak dipercaya.
+                $discount = 0;
+                if (! empty($data['voucher_code'])) {
+                    $voucher = Voucher::where('code', $data['voucher_code'])->active()->first();
+                    if ($voucher) {
+                        $discount = $voucher->discountFor($subtotal);
+                    }
+                }
                 $total = max(0, $subtotal + $shippingCost - $discount);
 
                 $order = Order::create([
@@ -101,7 +111,9 @@ class CheckoutController extends Controller
                 }
 
                 if (Auth::check()) {
-                    Auth::user()->cartItems()->delete();
+                    Auth::user()->cartItems()
+                        ->whereIn('product_variant_id', $purchasedVariantIds)
+                        ->delete();
                     $this->rememberBuyerData($data);
                 }
 

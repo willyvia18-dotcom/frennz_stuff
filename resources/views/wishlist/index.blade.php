@@ -17,7 +17,7 @@
     <div class="nav-actions">
       @include('partials.lang-switch')
       <a class="nav-icon-btn" href="{{ route('wishlist.index') }}" aria-label="{{ __('ui.nav.wishlist') }}">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.6 2 5 5.4 5c2 0 3.4 1.1 4.1 2.3C10.2 6.1 11.6 5 13.6 5 17 5 18.5 8.6 17 11.9 14.5 16.4 12 21 12 21z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span class="nav-count" data-wishlist-count style="display:none">0</span>
       </a>
       <a class="nav-icon-btn" href="{{ route('cart.index') }}" aria-label="{{ __('ui.nav.cart') }}">
@@ -53,6 +53,11 @@
 
 @section('scripts')
 <script>
+  function quickAdd(id) {
+    const p = getProductById(id);
+    if (!p || !p.sizes.length || !p.colors.length) return;
+    addToCart(id, p.sizes[0], p.colors[0].name, 1).then(() => render());
+  }
   function render() {
     const items = getWishlist().map(getProductById).filter(Boolean);
     document.getElementById("wl-empty").style.display = items.length ? "none" : "block";

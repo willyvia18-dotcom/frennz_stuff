@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'name', 'slug', 'price', 'sale_price',
+        'category_id', 'name', 'slug', 'brand', 'price', 'sale_price',
         'description', 'description_en', 'rating', 'reviews_count',
         'is_new', 'is_best_seller', 'status',
     ];
@@ -55,6 +55,7 @@ class Product extends Model
         return [
             'id' => (string) $this->id,
             'name' => $this->name,
+            'brand' => $this->brand ?? null,
             'category' => $this->category->name ?? '',
             'price' => (float) $this->price,
             'salePrice' => $this->sale_price !== null ? (float) $this->sale_price : null,

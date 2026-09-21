@@ -37,7 +37,7 @@
       </div>
       @include('partials.lang-switch')
       <a class="nav-icon-btn" href="{{ route('wishlist.index') }}" aria-label="{{ __('ui.nav.wishlist') }}">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.6 2 5 5.4 5c2 0 3.4 1.1 4.1 2.3C10.2 6.1 11.6 5 13.6 5 17 5 18.5 8.6 17 11.9 14.5 16.4 12 21 12 21z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span class="nav-count" data-wishlist-count style="display:none">0</span>
       </a>
       <a class="nav-icon-btn" href="{{ route('cart.index') }}" aria-label="{{ __('ui.nav.cart') }}">
@@ -63,6 +63,10 @@
         <div class="filter-list" id="filter-category"></div>
       </div>
       <div class="filter-group">
+        <h4>Brand</h4>
+        <div class="filter-list" id="filter-brand"></div>
+      </div>
+      <div class="filter-group">
         <h4>{{ __('ui.shop.filter_size') }}</h4>
         <div class="filter-list" id="filter-size"></div>
       </div>
@@ -73,7 +77,7 @@
       <div class="filter-group">
         <h4>{{ __('ui.shop.filter_max_price') }}</h4>
         <div class="price-range">
-          <input type="range" id="price-range" min="0" max="500000" step="10000" value="500000">
+          <input type="range" id="price-range" min="0" max="1000000" step="10000" value="1000000">
           <div class="price-range__labels"><span id="price-min-label"></span><span id="price-label"></span></div>
         </div>
       </div>
@@ -115,11 +119,16 @@
 <script>
   const products = getProducts();
   const params = new URLSearchParams(location.search);
-  const state = { q: params.get("q") || "", cats: params.get("cat") ? [params.get("cat")] : [], sizes: [], colors: [], maxPrice: 500000, sort: "default" };
+  const PRICE_CEIL = Math.ceil(Math.max(...products.map(p => p.salePrice || p.price), 1000000) / 50000) * 50000;
+  const state = { q: params.get("q") || "", cats: params.get("cat") ? [params.get("cat")] : [], brands: [], sizes: [], colors: [], maxPrice: PRICE_CEIL, sort: "default" };
   document.getElementById("quick-search").value = state.q;
+  const priceRange = document.getElementById("price-range");
+  priceRange.max = PRICE_CEIL;
+  priceRange.value = PRICE_CEIL;
   document.getElementById("price-min-label").textContent = formatRupiah(0);
-  document.getElementById("price-label").textContent = formatRupiah(500000);
+  document.getElementById("price-label").textContent = formatRupiah(PRICE_CEIL);
 
+  const allBrands = [...new Set(products.map(p => p.brand).filter(Boolean))];
   const allSizes = [...new Set(products.flatMap(p => p.sizes))];
   const allColors = [...new Set(products.flatMap(p => p.colors.map(c => c.name)))];
 
@@ -127,12 +136,14 @@
     container.innerHTML = items.map(item => `<label class="filter-check"><input type="checkbox" value="${item}" data-filter="${key}"><span>${labelFn ? labelFn(item) : item}</span></label>`).join("");
   }
   checkboxList(document.getElementById("filter-category"), getCategories().map(c => c.name), "cats", catLabelByName);
+  checkboxList(document.getElementById("filter-brand"), allBrands, "brands");
   checkboxList(document.getElementById("filter-size"), allSizes, "sizes");
   checkboxList(document.getElementById("filter-color"), allColors, "colors", colorName);
   document.querySelectorAll('input[data-filter="cats"]').forEach(cb => { if (state.cats.includes(cb.value)) cb.checked = true; });
 
   function productCard(p) {
     const price = p.salePrice ? `<span class="now">${formatRupiah(p.salePrice)}</span> <del>${formatRupiah(p.price)}</del>` : formatRupiah(p.price);
+    const brand = p.brand ? `<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);margin-bottom:4px;">${p.brand}</div>` : "";
     return `<article class="card">
       ${p.tag === "NEW" ? `<span class="card__flag">${t('common.new_flag')}</span>` : ""}
       <a class="card__link" href="{{ route('products.show') }}?id=${p.id}" aria-label="${p.name}"></a>
@@ -140,19 +151,24 @@
         <img src="${p.images[0]}" alt="${p.name}" loading="lazy">
         <div class="card__quickadd"><button class="btn btn-primary btn-sm btn-block" style="position:relative;z-index:3;" onclick="event.preventDefault();quickAdd('${p.id}')">${t('common.add_to_cart')}</button></div>
       </div>
-      <div class="card__body"><h3 class="card__title">${p.name}</h3><div class="card__price">${price}</div></div>
+        <div class="card__body">${brand}<h3 class="card__title">${p.name}</h3><div class="card__price">${price}</div></div>
     </article>`;
   }
-  function quickAdd(id) { const p = getProductById(id); addToCart(id, p.sizes[0], p.colors[0].name, 1); }
+  function quickAdd(id) {
+    const p = getProductById(id);
+    if (!p || !p.sizes.length || !p.colors.length) return;
+    addToCart(id, p.sizes[0], p.colors[0].name, 1);
+  }
 
   function applyFilters() {
     let list = products.filter(p => {
-      const matchQ = !state.q || p.name.toLowerCase().includes(state.q.toLowerCase()) || p.category.toLowerCase().includes(state.q.toLowerCase());
+      const matchQ = !state.q || p.name.toLowerCase().includes(state.q.toLowerCase()) || p.category.toLowerCase().includes(state.q.toLowerCase()) || (p.brand && p.brand.toLowerCase().includes(state.q.toLowerCase()));
       const matchCat = !state.cats.length || state.cats.includes(p.category);
+      const matchBrand = !state.brands.length || state.brands.includes(p.brand);
       const matchSize = !state.sizes.length || p.sizes.some(s => state.sizes.includes(s));
       const matchColor = !state.colors.length || p.colors.some(c => state.colors.includes(c.name));
       const matchPrice = (p.salePrice || p.price) <= state.maxPrice;
-      return matchQ && matchCat && matchSize && matchColor && matchPrice;
+      return matchQ && matchCat && matchBrand && matchSize && matchColor && matchPrice;
     });
     if (state.sort === "price-asc") list.sort((a,b) => (a.salePrice||a.price) - (b.salePrice||b.price));
     if (state.sort === "price-desc") list.sort((a,b) => (b.salePrice||b.price) - (a.salePrice||a.price));
@@ -181,11 +197,11 @@
     applyFilters();
   });
   document.getElementById("reset-filters").addEventListener("click", () => {
-    state.q=""; state.cats=[]; state.sizes=[]; state.colors=[]; state.maxPrice=500000; state.sort="default";
+    state.q=""; state.cats=[]; state.brands=[]; state.sizes=[]; state.colors=[]; state.maxPrice=PRICE_CEIL; state.sort="default";
     document.getElementById("quick-search").value = "";
     document.getElementById("sort-select").value = "default";
-    document.getElementById("price-range").value = 500000;
-    document.getElementById("price-label").textContent = formatRupiah(500000);
+    document.getElementById("price-range").value = PRICE_CEIL;
+    document.getElementById("price-label").textContent = formatRupiah(PRICE_CEIL);
     document.querySelectorAll('input[data-filter]').forEach(cb => cb.checked = false);
     applyFilters();
   });

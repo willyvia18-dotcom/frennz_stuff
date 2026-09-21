@@ -32,6 +32,10 @@
   <p class="text-muted" style="margin-top:6px;font-size:13.5px;">{{ __('ui.order.note') }}</p>
   <div style="display:flex;gap:10px;justify-content:center;margin-top:26px;flex-wrap:wrap;">
     <a href="{{ route('products.index') }}" class="btn btn-primary">{{ __('ui.order.continue') }}</a>
+    @auth
+    <a href="{{ route('profile.index', ['tab' => 'orders']) }}" class="btn btn-outline">{{ __('ui.profile.tab_orders') }}</a>
+    @endauth
+    <a href="{{ route('home') }}" class="btn btn-ghost">{{ __('ui.nav.home') }}</a>
   </div>
 </main>
 

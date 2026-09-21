@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\ProductVariant;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -23,7 +25,23 @@ class OrderController extends Controller
             'status' => ['required', 'in:pending,processing,shipped,completed,cancelled'],
         ]);
 
-        $order->update(['status' => $data['status']]);
+        if (in_array($order->status, ['completed', 'cancelled'], true)) {
+            return response()->json(['ok' => false, 'message' => __('ui.messages.order_locked')], 422);
+        }
+
+        DB::transaction(function () use ($order, $data) {
+            // Pembatalan mengembalikan stok varian yang dipesan.
+            if ($data['status'] === 'cancelled') {
+                foreach ($order->items as $item) {
+                    ProductVariant::where('product_id', $item->product_id)
+                        ->where('size', $item->size)
+                        ->where('color_name', $item->color)
+                        ->increment('stock', $item->qty);
+                }
+            }
+
+            $order->update(['status' => $data['status']]);
+        });
 
         return response()->json(['ok' => true, 'order' => $this->toAdminArray($order->fresh('items'))]);
     }

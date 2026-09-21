@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -39,6 +40,7 @@ class ProductController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'brand' => ['nullable', 'string', 'max:50'],
             'category' => ['required', 'string'],
             'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'price' => ['required', 'numeric', 'min:0'],
@@ -66,6 +68,7 @@ class ProductController extends Controller
         $product->fill([
             'category_id' => $category->id,
             'name' => $data['name'],
+            'brand' => $data['brand'] ?? null,
             'price' => $data['price'],
             'sale_price' => $data['sale_price'] ?: null,
             'description' => $data['desc'] ?? '',
@@ -75,34 +78,37 @@ class ProductController extends Controller
             'is_best_seller' => (bool) ($data['bestseller'] ?? false),
             'status' => 'published',
         ]);
-        $product->save();
 
-        $sizes = array_values(array_filter(array_map('trim', explode(',', $data['sizes']))));
-        $stocks = array_map('trim', explode(',', $data['stock_list']));
-        $colors = array_values(array_filter(array_map(function ($pair) {
-            [$name, $hex] = array_pad(explode(':', trim($pair)), 2, '#cccccc');
-            return ['name' => trim($name), 'hex' => trim($hex)];
-        }, explode(',', $data['colors']))));
-        $images = array_values(array_filter(array_map('trim', explode(',', $data['images']))));
+        DB::transaction(function () use ($product, $data) {
+            $product->save();
 
-        $product->variants()->delete();
-        foreach ($sizes as $i => $size) {
-            $stock = (int) ($stocks[$i] ?? 0);
-            foreach ($colors as $j => $color) {
-                $product->variants()->create([
-                    'size' => $size,
-                    'color_name' => $color['name'],
-                    'color_hex' => $color['hex'],
-                    'stock' => $stock,
-                    'sku' => 'FZ-' . Str::upper(Str::random(6)) . '-' . $i . $j,
-                ]);
+            $sizes = array_values(array_filter(array_map('trim', explode(',', $data['sizes']))));
+            $stocks = array_map('trim', explode(',', $data['stock_list']));
+            $colors = array_values(array_filter(array_map(function ($pair) {
+                [$name, $hex] = array_pad(explode(':', trim($pair)), 2, '#cccccc');
+                return ['name' => trim($name), 'hex' => trim($hex)];
+            }, explode(',', $data['colors']))));
+            $images = array_values(array_filter(array_map('trim', explode(',', $data['images']))));
+
+            $product->variants()->delete();
+            foreach ($sizes as $i => $size) {
+                $stock = (int) ($stocks[$i] ?? 0);
+                foreach ($colors as $j => $color) {
+                    $product->variants()->create([
+                        'size' => $size,
+                        'color_name' => $color['name'],
+                        'color_hex' => $color['hex'],
+                        'stock' => $stock,
+                        'sku' => 'FZ-' . Str::upper(Str::random(6)) . '-' . $i . $j,
+                    ]);
+                }
             }
-        }
 
-        $product->images()->delete();
-        foreach ($images as $i => $url) {
-            $product->images()->create(['image_path' => $url, 'sort_order' => $i]);
-        }
+            $product->images()->delete();
+            foreach ($images as $i => $url) {
+                $product->images()->create(['image_path' => $url, 'sort_order' => $i]);
+            }
+        });
 
         return response()->json(['ok' => true, 'products' => $this->allProducts()]);
     }

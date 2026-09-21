@@ -9,20 +9,22 @@ class HomeController extends Controller
         $featuredProducts = [
             [
                 'id' => 1,
-                'name' => 'Oversized T-Shirt',
+                'name' => 'Long Sleeve Polo Stone Island',
                 'category' => 'T-Shirt',
-                'price' => 169000,
+                'brand' => 'Stone Island',
+                'price' => 299000,
                 'sale_price' => null,
-                'image' => 'https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=800&q=80',
+                'image' => '/images/products/signature-tee-heavyweight-1.jpg',
                 'label' => 'New'
             ],
             [
                 'id' => 2,
-                'name' => 'Streetwear Hoodie',
+                'name' => 'Adidas Adicolor Track Jacket',
                 'category' => 'Hoodie',
-                'price' => 289000,
-                'sale_price' => 249000,
-                'image' => 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=80',
+                'brand' => 'Adidas',
+                'price' => 649000,
+                'sale_price' => null,
+                'image' => '/images/products/track-jacket-minimal-1.jpg',
                 'label' => 'Best Seller'
             ],
         ];
